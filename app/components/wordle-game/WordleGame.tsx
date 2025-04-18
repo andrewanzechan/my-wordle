@@ -17,13 +17,14 @@ export function WordleGame() {
     const targetWord: string = "tests";
     const targetLetters: Array<string> = targetWord.split("");
     const [currentGuess, setCurrentGuess]: [string, Function] = useState("");
-    const [guessHistory, setGuessHistory]: [Array<LetterGuess[]>, Function] = useState(Array(MAX_ATTEMPTS).fill([]));
+    const [guessHistory, setGuessHistory]: [Array<LetterGuess[]>, Function] 
+        = useState<LetterGuess[][]>(Array.from({ length: MAX_ATTEMPTS }, () => []));
     const [attempts, setAttempts]: [number, Function] = useState(0);
     const [gameStatus, setGameStatus]: [string, Function] = useState(IN_PROGRESS);
 
     function reset(): void {
         console.log("reset game");
-        setGuessHistory(Array(MAX_ATTEMPTS).fill(""));
+        setGuessHistory(Array.from({ length: MAX_ATTEMPTS }, () => []));
         console.log("guessHistory: " + guessHistory);
         setCurrentGuess("");
         console.log("currentGuess: " + currentGuess);
@@ -39,7 +40,7 @@ export function WordleGame() {
             console.log("Game is over; please reset");
             return;
         }
-        if (!/^[a-zA-z]+/.test(nextGuess)) {
+        if (!/^[a-zA-Z]+$/.test(nextGuess)) {
             console.log("guess must only contain letters");
             return;
         }
@@ -104,7 +105,7 @@ export function WordleGame() {
                 </div>
             </div>
             <div>
-                <form>
+                <form onSubmit={e => { e.preventDefault(); }}>
                     <label>Guess: </label>
                     <input type="text" id="guessInput" onChange={e => setCurrentGuess(e.target.value)} />
                     <button type="button" onClick={() => handlePlay(currentGuess)}> Confirm </button>
