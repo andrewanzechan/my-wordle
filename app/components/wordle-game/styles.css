@@ -71,6 +71,22 @@ body {
   width: 34px;
 }
 
+
+.square.correct {
+  background-color: green;
+  color: white;
+}
+
+.square.present {
+  background-color: gold;
+  color: black;
+}
+
+.square.absent {
+  background-color: lightgray;
+  color: black;
+}
+
 .board-row:after {
   clear: both;
   content: '';
