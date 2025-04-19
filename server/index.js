@@ -130,8 +130,8 @@ const route0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   default: root,
   links
 }, Symbol.toStringTag, { value: "Module" }));
-const logoDark = "/my-wordle/assets/logo-dark-pX2395Y0.svg";
-const logoLight = "/my-wordle/assets/logo-light-CVbx2LBR.svg";
+const logoDark = "/assets/logo-dark-pX2395Y0.svg";
+const logoLight = "/assets/logo-light-CVbx2LBR.svg";
 function Welcome() {
   return /* @__PURE__ */ jsx("main", { className: "flex items-center justify-center pt-16 pb-4", children: /* @__PURE__ */ jsxs("div", { className: "flex-1 flex flex-col items-center gap-16 min-h-0", children: [
     /* @__PURE__ */ jsx("header", { className: "flex flex-col items-center gap-9", children: /* @__PURE__ */ jsxs("div", { className: "w-[500px] max-w-[100vw] p-4", children: [
@@ -368,14 +368,14 @@ const route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   __proto__: null,
   default: wordle
 }, Symbol.toStringTag, { value: "Module" }));
-const serverManifest = { "entry": { "module": "/my-wordleassets/entry.client-CegG8TPS.js", "imports": ["/my-wordleassets/chunk-HA7DTUK3-BaDD2dak.js", "/my-wordleassets/index-Bi5LzHtx.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/my-wordleassets/root-f6VMox5o.js", "imports": ["/my-wordleassets/chunk-HA7DTUK3-BaDD2dak.js", "/my-wordleassets/index-Bi5LzHtx.js", "/my-wordleassets/with-props-CwHmG_V2.js"], "css": ["/my-wordleassets/root-CC9rEo_2.css"], "clientActionModule": void 0, "clientLoaderModule": void 0, "hydrateFallbackModule": void 0 }, "routes/home": { "id": "routes/home", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/my-wordleassets/home-DyeOzpP0.js", "imports": ["/my-wordleassets/with-props-CwHmG_V2.js", "/my-wordleassets/chunk-HA7DTUK3-BaDD2dak.js"], "css": [], "clientActionModule": void 0, "clientLoaderModule": void 0, "hydrateFallbackModule": void 0 }, "routes/wordle": { "id": "routes/wordle", "parentId": "root", "path": "wordle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/my-wordleassets/wordle-cQvLLqNA.js", "imports": ["/my-wordleassets/with-props-CwHmG_V2.js", "/my-wordleassets/chunk-HA7DTUK3-BaDD2dak.js", "/my-wordleassets/index-Bi5LzHtx.js"], "css": ["/my-wordleassets/wordle-YmHFttsD.css"], "clientActionModule": void 0, "clientLoaderModule": void 0, "hydrateFallbackModule": void 0 } }, "url": "/my-wordleassets/manifest-a097d125.js", "version": "a097d125" };
+const serverManifest = { "entry": { "module": "/assets/entry.client-CegG8TPS.js", "imports": ["/assets/chunk-HA7DTUK3-BaDD2dak.js", "/assets/index-Bi5LzHtx.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-f6VMox5o.js", "imports": ["/assets/chunk-HA7DTUK3-BaDD2dak.js", "/assets/index-Bi5LzHtx.js", "/assets/with-props-CwHmG_V2.js"], "css": ["/assets/root-CC9rEo_2.css"], "clientActionModule": void 0, "clientLoaderModule": void 0, "hydrateFallbackModule": void 0 }, "routes/home": { "id": "routes/home", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/home-DyQ6k1JL.js", "imports": ["/assets/with-props-CwHmG_V2.js", "/assets/chunk-HA7DTUK3-BaDD2dak.js"], "css": [], "clientActionModule": void 0, "clientLoaderModule": void 0, "hydrateFallbackModule": void 0 }, "routes/wordle": { "id": "routes/wordle", "parentId": "root", "path": "wordle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/wordle-cQvLLqNA.js", "imports": ["/assets/with-props-CwHmG_V2.js", "/assets/chunk-HA7DTUK3-BaDD2dak.js", "/assets/index-Bi5LzHtx.js"], "css": ["/assets/wordle-YmHFttsD.css"], "clientActionModule": void 0, "clientLoaderModule": void 0, "hydrateFallbackModule": void 0 } }, "url": "/assets/manifest-583c7fdb.js", "version": "583c7fdb" };
 const assetsBuildDirectory = "build/client";
 const basename = "/";
 const future = { "unstable_optimizeDeps": false, "unstable_splitRouteModules": false, "unstable_viteEnvironmentApi": false };
 const ssr = true;
 const isSpaMode = false;
 const prerender = [];
-const publicPath = "/my-wordle";
+const publicPath = "/";
 const entry = { module: entryServer };
 const routes = {
   "root": {
