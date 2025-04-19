@@ -1,5 +1,7 @@
 import { useState } from "react";
+import Button from "@mui/material/Button"
 import "./styles.css";
+import { Card, CardContent, Container, TextField } from "@mui/material";
 
 type LetterStatus = "correct" | "present" | "absent";
 
@@ -10,26 +12,31 @@ interface LetterGuess {
 
 export function WordleGame() {
     const MAX_ATTEMPTS: number = 5;
-    const WIN: string = "win";
-    const LOSE: string = "lose";
-    const IN_PROGRESS: string = "in progress";
-    
+    const WIN: string = "Win";
+    const LOSE: string = "Lose";
+    const IN_PROGRESS: string = "In progress";
+
     const targetWord: string = "tests";
+
+    const ERROR_GAME_OVER = "The game is over; please reset the game."
+    const ERROR_ALREADY_GUESSED = "You have already guessed this word."
+    const ERROR_GUESS_WORD_LENGTH_INCORRECT = `Your guess must have ${targetWord.length} letters.`
+
+    const ALPHA_REGEX = /^[a-zA-Z]+$/;
+    
     const targetLetters: Array<string> = targetWord.split("");
     const [currentGuess, setCurrentGuess]: [string, Function] = useState("");
     const [guessHistory, setGuessHistory]: [Array<LetterGuess[]>, Function] 
         = useState<LetterGuess[][]>(Array.from({ length: MAX_ATTEMPTS }, () => []));
     const [attempts, setAttempts]: [number, Function] = useState(0);
     const [gameStatus, setGameStatus]: [string, Function] = useState(IN_PROGRESS);
+    const [guessMessage, setGuessMessage]: [string, Function] = useState("");
 
     function reset(): void {
         console.log("reset game");
         setGuessHistory(Array.from({ length: MAX_ATTEMPTS }, () => []));
-        console.log("guessHistory: " + guessHistory);
         setCurrentGuess("");
-        console.log("currentGuess: " + currentGuess);
         setAttempts(0);
-        console.log("attempts: " + attempts);
         setGameStatus(IN_PROGRESS);
     }
 
@@ -37,21 +44,21 @@ export function WordleGame() {
         nextGuess = nextGuess.toLowerCase().trim();
         console.log("processing guess: " + nextGuess);
         if (gameStatus !== IN_PROGRESS) {
-            console.log("Game is over; please reset");
-            return;
-        }
-        if (!/^[a-zA-Z]+$/.test(nextGuess)) {
-            console.log("guess must only contain letters");
+            console.log(ERROR_GAME_OVER);
+            setGuessMessage(ERROR_GAME_OVER);
             return;
         }
         if (nextGuess.length != targetWord.length) {
-            console.log("guessed word has the wrong length, expected " + targetWord.length + ", saw " + nextGuess.length);
+            console.log(ERROR_GUESS_WORD_LENGTH_INCORRECT);
+            setGuessMessage(ERROR_GUESS_WORD_LENGTH_INCORRECT);
             return;
         }
         if (guessHistory.some(g => g.map(l => l.letter).join("") === nextGuess)) {
-            console.log("word already guessed");
+            console.log(ERROR_ALREADY_GUESSED);
+            setGuessMessage(ERROR_ALREADY_GUESSED);
             return;
         }
+        setGuessMessage("");
 
         console.log("making a guess");
         const nextLetterGuess: LetterGuess[] = Array(targetWord.length).fill(null).map((_, i) => ({
@@ -87,6 +94,7 @@ export function WordleGame() {
         if (nextGuess === targetWord) {
             console.log("win");
             setGameStatus(WIN);
+
         } else if (attempts >= MAX_ATTEMPTS) {
             console.log("lose");
             setGameStatus(LOSE);
@@ -97,22 +105,33 @@ export function WordleGame() {
 
     return (
         <>
+            <div className="status"> Attempts remaining: {MAX_ATTEMPTS - attempts} </div>
+            <div className="status"> Game status: {gameStatus} </div>
             <div className="game">
                 <div className="game-board">
-                    <div className="status"> Attempts remaining: {MAX_ATTEMPTS - attempts} </div>
-                    <div className="status"> Game status: {gameStatus} </div>
                     <Board guessHistory={guessHistory} />
                 </div>
             </div>
             <div>
-                <form onSubmit={e => { e.preventDefault(); }}>
-                    <label>Guess: </label>
-                    <input type="text" id="guessInput" onChange={e => setCurrentGuess(e.target.value)} />
-                    <button type="button" onClick={() => handlePlay(currentGuess)}> Confirm </button>
-                </form>
+                <TextField 
+                    className="guess-textfield" 
+                    label="Guess" 
+                    value={currentGuess} onChange={e => setCurrentGuess(e.target.value)}
+                    onKeyDown={e => {
+                        if (!ALPHA_REGEX.test(e.key)) {
+                            e.preventDefault();
+                        }
+                    }}
+                />
+                <div className="status">
+                    {guessMessage}
+                </div>
             </div>
             <div>
-                <button type="button" onClick={() => reset()}> Reset </button>
+                <Button type="button" onClick={() => handlePlay(currentGuess)}> Confirm </Button>
+            </div>
+            <div>
+                <Button type="button" onClick={() => reset()}> Reset </Button>
             </div>
         </>
     );
@@ -128,7 +147,7 @@ function Square({ letter, letterStatus }: { letter: string, letterStatus: Letter
 
 function Board({ guessHistory }: { guessHistory: Array<LetterGuess[]> }) {
     return (
-        <>
+        <div className="wordle-board">
             {guessHistory.map((guessHistoryEntry: LetterGuess[], rowIndex: number) => (
                 <div className="board-row" key={rowIndex}>
                     {[0, 1, 2, 3, 4].map((i) => (
@@ -140,6 +159,6 @@ function Board({ guessHistory }: { guessHistory: Array<LetterGuess[]> }) {
                     ))}
                 </div>
             ))}
-        </>
+        </div>
     );
 }

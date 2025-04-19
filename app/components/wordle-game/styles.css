@@ -98,8 +98,9 @@ button {
 }
 
 .status {
-  margin-bottom: 10px;
+  margin: 10px;
 }
+
 .game {
   display: flex;
   flex-direction: row;
@@ -107,4 +108,16 @@ button {
 
 .game-info {
   margin-left: 20px;
+}
+
+.wordle-board {
+  padding: 2rem;
+}
+
+.guess-textfield {
+  padding: 1rem;
+}
+
+.guess-message {
+  padding: 1rem;
 }
