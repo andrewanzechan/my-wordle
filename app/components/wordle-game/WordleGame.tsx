@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Button from "@mui/material/Button"
 import "./styles.css";
-import { Card, CardContent, Container, TextField } from "@mui/material";
+import { TextField } from "@mui/material";
 
 type LetterStatus = "correct" | "present" | "absent";
 
