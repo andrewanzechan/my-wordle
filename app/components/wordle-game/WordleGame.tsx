@@ -1,9 +1,7 @@
-import { useState } from "react";
-import Button from "@mui/material/Button"
 import "./styles.css";
-import { TextField } from "@mui/material";
 import axios from "axios";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
+import { TextField, Button } from "@mui/material";
 
 type LetterStatus = "correct" | "present" | "absent";
 
@@ -12,17 +10,26 @@ interface LetterGuess {
     status: LetterStatus;
 }
 
+const MAX_ATTEMPTS: number = 5;
+const MAX_WORD_LENGTH: number = 5;
+const WIN: string = "Win";
+const LOSE: string = "Lose";
+const IN_PROGRESS: string = "In progress";
+
+const ERROR_GAME_OVER = "The game is over; please reset the game.";
+const ERROR_ALREADY_GUESSED = "You have already guessed this word.";
+const ERROR_GUESS_WORD_LENGTH_INCORRECT = `Your guess must have ${MAX_WORD_LENGTH} letters.`;
+const ERROR_GUESS_NOT_IN_DICTIONARY = "Your guess is not in the dictionary.";
+const ERROR_API_CALL_FAILED = "API call failed. Please try again.";
+
+const ALPHA_REGEX = /^[a-zA-Z]+$/;
+
 export function WordleGame() {
-    const MAX_ATTEMPTS: number = 5;
-    const MAX_WORD_LENGTH: number = 5;
-    const WIN: string = "Win";
-    const LOSE: string = "Lose";
-    const IN_PROGRESS: string = "In progress";
-
     const [targetWord, setTargetWord]: [string, Function] = useState("tests");
-
+    
+    // Fetch a random word from the Datamuse API
     useEffect(() => {
-        axios.get("https://api.datamuse.com/words?sp=?????&max=1000")
+        axios.get(`https://api.datamuse.com/words?sp=${Array(MAX_WORD_LENGTH).fill("?").join("")}&max=1000`)
             .then((response) => {
                 const randomIndex: number = Math.floor(Math.random() * 1000);
                 setTargetWord(response.data[randomIndex].word.toLowerCase());
@@ -32,14 +39,6 @@ export function WordleGame() {
             });
     }, []);
 
-    const ERROR_GAME_OVER = "The game is over; please reset the game.";
-    const ERROR_ALREADY_GUESSED = "You have already guessed this word.";
-    const ERROR_GUESS_WORD_LENGTH_INCORRECT = `Your guess must have ${MAX_WORD_LENGTH} letters.`;
-    const ERROR_GUESS_NOT_IN_DICTIONARY = "Your guess is not in the dictionary.";
-    const ERROR_API_CALL_FAILED = "API call failed. Please try again.";
-
-    const ALPHA_REGEX = /^[a-zA-Z]+$/;
-
     const [currentGuess, setCurrentGuess]: [string, Function] = useState("");
     const [guessHistory, setGuessHistory]: [Array<LetterGuess[]>, Function] 
         = useState<LetterGuess[][]>(Array.from({ length: MAX_ATTEMPTS }, () => []));
@@ -48,48 +47,61 @@ export function WordleGame() {
     const [guessMessage, setGuessMessage]: [string, Function] = useState("");
 
     function reset(): void {
-        console.log("reset game");
+        console.log("Resetting game");
         setGuessHistory(Array.from({ length: MAX_ATTEMPTS }, () => []));
         setCurrentGuess("");
         setAttempts(0);
         setGameStatus(IN_PROGRESS);
     }
 
-    async function handlePlay(nextGuess: string): Promise<void> {
-        nextGuess = nextGuess.toLowerCase().trim();
-        console.log("processing guess: " + nextGuess);
+    async function validateGuess(guess: string): Promise<boolean> {
+        console.log("validating guess: " + guess);
+
+        // Check if the game is over
         if (gameStatus !== IN_PROGRESS) {
             console.log(ERROR_GAME_OVER);
             setGuessMessage(ERROR_GAME_OVER);
-            return;
-        }
-        if (nextGuess.length != targetWord.length) {
-            console.log(ERROR_GUESS_WORD_LENGTH_INCORRECT);
-            setGuessMessage(ERROR_GUESS_WORD_LENGTH_INCORRECT);
-            return;
-        }
-        if (guessHistory.some(g => g.map(l => l.letter).join("") === nextGuess)) {
-            console.log(ERROR_ALREADY_GUESSED);
-            setGuessMessage(ERROR_ALREADY_GUESSED);
-            return;
+            return false;
         }
 
+        // Check if the guess has enough letters
+        if (guess.length != targetWord.length) {
+            console.log(ERROR_GUESS_WORD_LENGTH_INCORRECT);
+            setGuessMessage(ERROR_GUESS_WORD_LENGTH_INCORRECT);
+            return false;
+        }
+
+        // Check if the guess was already gyessed
+        if (guessHistory.some(g => g.map(l => l.letter).join("") === guess)) {
+            console.log(ERROR_ALREADY_GUESSED);
+            setGuessMessage(ERROR_ALREADY_GUESSED);
+            return false;
+        }
         try {
-            const response = await axios.get(`https://api.datamuse.com/words?sp=${nextGuess}&max=1`);
-            if (response.data.length === 0 || response.data[0].word.toLowerCase() !== nextGuess) {
+            const response = await axios.get(`https://api.datamuse.com/words?sp=${guess}&max=1`);
+            if (response.data.length === 0 || response.data[0].word.toLowerCase() !== guess) {
                 console.log(ERROR_GUESS_NOT_IN_DICTIONARY);
                 setGuessMessage(ERROR_GUESS_NOT_IN_DICTIONARY);
-                return;
+                return false;
             }
         } catch(error) {
             console.error("Error fetching data from API:", error);
             setGuessMessage(ERROR_API_CALL_FAILED);
+            return false;
+        }
+        return true;
+    }
+
+    async function handlePlay(nextGuess: string): Promise<void> {
+        nextGuess = nextGuess.toLowerCase().trim();
+        
+        if (await validateGuess(nextGuess) === false) {
             return;
         }
 
         setGuessMessage("");
 
-        console.log("making a guess");
+        console.log("making a guess: " + nextGuess);
         const targetLetters: Array<string> = targetWord.split("");
 
         const nextLetterGuess: LetterGuess[] = Array(MAX_WORD_LENGTH).fill(null).map((_, i) => ({
@@ -118,19 +130,18 @@ export function WordleGame() {
 
         const nextGuessHistory: Array<LetterGuess[]> = [...guessHistory];
         nextGuessHistory[attempts] = nextLetterGuess;
-        setGuessHistory(nextGuessHistory);  // puts the new guess history back into the state
+        setGuessHistory(nextGuessHistory);
         
         const newAttempts = attempts + 1;
         setAttempts(newAttempts);
         if (nextGuess === targetWord) {
-            console.log("win");
+            console.log(WIN);
             setGameStatus(WIN);
-
         } else if (newAttempts >= MAX_ATTEMPTS) {
-            console.log("lose");
+            console.log(LOSE);
             setGameStatus(LOSE);
         }
-        console.log("attempts: " + attempts);
+        console.log("attempts: " + newAttempts);
         setCurrentGuess("");
     }
 
@@ -148,6 +159,8 @@ export function WordleGame() {
                     className="guess-textfield" 
                     label="Guess" 
                     value={currentGuess} onChange={e => setCurrentGuess(e.target.value)}
+                    
+                    // prevent typing non-alphabetic characters
                     onKeyDown={e => {
                         if (!ALPHA_REGEX.test(e.key)) {
                             e.preventDefault();
@@ -158,14 +171,14 @@ export function WordleGame() {
                     {guessMessage}
                 </div>
                 {gameStatus === LOSE && (
-                    <div className="status">The correct word was: {targetWord}</div>
+                <div className="status">The correct word was: {targetWord}</div>
                 )}
             </div>
             <div>
                 <Button type="button" onClick={() => handlePlay(currentGuess)}> Confirm </Button>
             </div>
             <div>
-                <Button type="button" onClick={() => reset()}> Reset </Button>
+                <Button type="button" onClick={() => reset()}> New Game </Button>
             </div>
         </>
     );
