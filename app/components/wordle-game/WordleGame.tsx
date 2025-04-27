@@ -1,7 +1,9 @@
-import "./styles.css";
+import "./wordleGame.css";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { TextField, Button } from "@mui/material";
+import Rand from "rand-seed";
+
 
 type LetterStatus = "correct" | "present" | "absent";
 
@@ -10,8 +12,8 @@ interface LetterGuess {
     status: LetterStatus;
 }
 
-const MAX_ATTEMPTS: number = 5;
-const MAX_WORD_LENGTH: number = 5;
+const MAX_ATTEMPTS: number = 7;
+const MAX_WORD_LENGTH: number = 7;
 const WIN: string = "Win";
 const LOSE: string = "Lose";
 const IN_PROGRESS: string = "In progress";
@@ -25,13 +27,22 @@ const ERROR_API_CALL_FAILED = "API call failed. Please try again.";
 const ALPHA_REGEX = /^[a-zA-Z]+$/;
 
 export function WordleGame() {
-    const [targetWord, setTargetWord]: [string, Function] = useState("tests");
+    const [currentGuess, setCurrentGuess]: [string, Function] = useState("");
+    const [guessHistory, setGuessHistory]: [Array<LetterGuess[]>, Function] 
+        = useState<LetterGuess[][]>(Array.from({ length: MAX_ATTEMPTS }, () => []));
+    const [attempts, setAttempts]: [number, Function] = useState(0);
+    const [gameStatus, setGameStatus]: [string, Function] = useState(IN_PROGRESS);
+    const [guessMessage, setGuessMessage]: [string, Function] = useState("");
+    const [targetWord, setTargetWord]: [string, Function] = useState("");
+    const today = new Date();
+    const seed = today.getFullYear().toString() + today.getMonth().toString() + today.getDate().toString();
+    const rand = new Rand(seed);
     
     // Fetch a random word from the Datamuse API
     useEffect(() => {
         axios.get(`https://api.datamuse.com/words?sp=${Array(MAX_WORD_LENGTH).fill("?").join("")}&max=1000`)
             .then((response) => {
-                const randomIndex: number = Math.floor(Math.random() * 1000);
+                const randomIndex: number = Math.floor(rand.next() * 1000);
                 setTargetWord(response.data[randomIndex].word.toLowerCase());
             })
             .catch((error) => {
@@ -39,13 +50,7 @@ export function WordleGame() {
             });
     }, []);
 
-    const [currentGuess, setCurrentGuess]: [string, Function] = useState("");
-    const [guessHistory, setGuessHistory]: [Array<LetterGuess[]>, Function] 
-        = useState<LetterGuess[][]>(Array.from({ length: MAX_ATTEMPTS }, () => []));
-    const [attempts, setAttempts]: [number, Function] = useState(0);
-    const [gameStatus, setGameStatus]: [string, Function] = useState(IN_PROGRESS);
-    const [guessMessage, setGuessMessage]: [string, Function] = useState("");
-
+    // Reset the game by clearing old guesses and attempts
     function reset(): void {
         console.log("Resetting game");
         setGuessHistory(Array.from({ length: MAX_ATTEMPTS }, () => []));
@@ -54,6 +59,7 @@ export function WordleGame() {
         setGameStatus(IN_PROGRESS);
     }
 
+    // Checks if the guess is valid
     async function validateGuess(guess: string): Promise<boolean> {
         console.log("validating guess: " + guess);
 
@@ -71,12 +77,14 @@ export function WordleGame() {
             return false;
         }
 
-        // Check if the guess was already gyessed
+        // Check if the guess was already guessed
         if (guessHistory.some(g => g.map(l => l.letter).join("") === guess)) {
             console.log(ERROR_ALREADY_GUESSED);
             setGuessMessage(ERROR_ALREADY_GUESSED);
             return false;
         }
+
+        // Check if the guess is a real word
         try {
             const response = await axios.get(`https://api.datamuse.com/words?sp=${guess}&max=1`);
             if (response.data.length === 0 || response.data[0].word.toLowerCase() !== guess) {
@@ -85,13 +93,14 @@ export function WordleGame() {
                 return false;
             }
         } catch(error) {
-            console.error("Error fetching data from API:", error);
+            console.error("Error fetching data from API: ", error);
             setGuessMessage(ERROR_API_CALL_FAILED);
             return false;
         }
         return true;
     }
 
+    // Processes the guess
     async function handlePlay(nextGuess: string): Promise<void> {
         nextGuess = nextGuess.toLowerCase().trim();
         
@@ -197,7 +206,7 @@ function Board({ guessHistory }: { guessHistory: Array<LetterGuess[]> }) {
         <div className="wordle-board">
             {guessHistory.map((guessHistoryEntry: LetterGuess[], rowIndex: number) => (
                 <div className="board-row" key={rowIndex}>
-                    {[0, 1, 2, 3, 4].map((i) => (
+                    {Array.from({ length: MAX_WORD_LENGTH }, (_, i) => (
                         <Square 
                             key={i} 
                             letter={guessHistoryEntry?.[i]?.letter || ""} 
